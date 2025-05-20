@@ -1,0 +1,122 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 120 40% 98%;
+    --foreground: 120 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 120 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 10% 10%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 120 40% 96%;
+    --secondary-foreground: 120 10% 10%;
+
+    --muted: 120 40% 96%;
+    --muted-foreground: 120 10% 40%;
+
+    --accent: 134 61% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 120 20% 90%;
+    --input: 120 20% 90%;
+    --ring: 142 76% 36%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 120 40% 98%;
+    --sidebar-foreground: 120 10% 10%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 40% 96%;
+    --sidebar-accent-foreground: 120 10% 10%;
+    --sidebar-border: 120 20% 90%;
+    --sidebar-ring: 142 76% 36%;
+  }
+
+  .dark {
+    --background: 120 15% 10%;
+    --foreground: 120 10% 95%;
+
+    --card: 120 15% 15%;
+    --card-foreground: 120 10% 95%;
+
+    --popover: 120 15% 15%;
+    --popover-foreground: 120 10% 95%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 120 15% 20%;
+    --secondary-foreground: 120 10% 95%;
+
+    --muted: 120 15% 20%;
+    --muted-foreground: 120 10% 70%;
+
+    --accent: 134 61% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 120 15% 20%;
+    --input: 120 15% 20%;
+    --ring: 142 76% 36%;
+
+    --sidebar-background: 120 15% 15%;
+    --sidebar-foreground: 120 10% 95%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 15% 20%;
+    --sidebar-accent-foreground: 120 10% 95%;
+    --sidebar-border: 120 15% 20%;
+    --sidebar-ring: 142 76% 36%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  .eco-card {
+    @apply bg-white rounded-xl shadow-md p-4 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer border-l-4 border-eco flex flex-col items-center justify-center text-center h-full;
+  }
+
+  .eco-icon {
+    @apply text-eco w-10 h-10 mb-2;
+  }
+
+  .animate-bounce-hover:hover {
+    animation: bounce 0.6s ease-in-out;
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  .bg-eco-gradient {
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.8) 0%, rgba(139, 195, 74, 0.8) 100%);
+  }
+}
