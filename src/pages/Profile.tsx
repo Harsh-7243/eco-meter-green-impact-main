@@ -18,9 +18,9 @@ const ProfilePage = () => {
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("actions");
   const [userData, setUserData] = useState({
-    name: "Harsh Kumar",
-    email: "emma.watson@example.com",
-    location: "San Francisco, CA",
+    name: "Harshita",
+    email: "harshita@gmail.com",
+    location: "Patna , Bihar",
     joinDate: "May 12, 2024",
     bio: "Environmental activist and sustainability enthusiast. Passionate about making our planet greener one step at a time."
   });
