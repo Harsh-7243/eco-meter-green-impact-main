@@ -1,73 +1,40 @@
-# Welcome to your Lovable project
+🌱 EcoMeter – Green Impact Tracker
+EcoMeter is a web-based tool designed to help users monitor and reduce their environmental footprint. It provides insights into energy consumption, promotes sustainable habits, and encourages eco-friendly practices.
 
-## Project info
+🚀 Features
+1.Real-Time Tracking: Monitor your energy usage in real-time.
+2.Analytics Dashboard: Visualize consumption patterns and identify areas for improvement.
+3.Sustainability Tips: Receive personalized recommendations to reduce your carbon footprint.
+4.User-Friendly Interface: Navigate through an intuitive and responsive design.
 
-**URL**: https://lovable.dev/projects/c8b2f220-b951-460c-ade1-f3b243e215bd
+🛠️ Tech Stack
+Frontend: TypeScript, React, Tailwind CSS
+Build Tool: Vite
+Package Manager: Bun
+Code Quality: ESLint
+Configuration: TypeScript, PostCSS
 
-## How can I edit this code?
+📦 Installation
+To set up the project locally:
 
-There are several ways of editing your application.
+1. Clone the repository:
+  git clone https://github.com/Harsh-7243/eco-meter-green-impact-main.git
+  cd eco-meter-green-impact-main
 
-**Use Lovable**
+2. Install dependencies:
+  bun install
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c8b2f220-b951-460c-ade1-f3b243e215bd) and start prompting.
+3. Start the development server:
+  bun run dev
 
-Changes made via Lovable will be committed automatically to this repo.
+🤝 Contributing
+We welcome contributions! To get started:
+1. Fork the repository.
+2. Create a new branch:
+    git checkout -b feature/your-feature-name
+3. Make your changes and commit them:
+    git commit -m "Add your message here"
+4. Push to your fork:
+    git push origin feature/your-feature-name
+5.Open a Pull Request and describe your changes.
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c8b2f220-b951-460c-ade1-f3b243e215bd) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
