@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,21 +8,63 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { User, Edit, Save, Award, Calendar, Activity } from 'lucide-react';
+import { User, Edit, Save, Award, Calendar, Activity, MapPin, Cake } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+
+const LOCAL_STORAGE_KEY = 'ecoProfileUserData';
 
 const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("actions");
-  const [userData, setUserData] = useState({
-    name: "Harshita",
-    email: "harshita@gmail.com",
-    location: "Patna , Bihar",
-    joinDate: "May 12, 2024",
+  const [userData, setUserData] = useState(() => {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+    return {
+      name: "",
+      email: "",
+      location: "",
+      place: "",
+      dob: "",
+      sex: "",
+      joinDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     bio: "Environmental activist and sustainability enthusiast. Passionate about making our planet greener one step at a time."
+    };
   });
+  const [recentActions, setRecentActions] = useState<any[]>([]);
+  const [showAllActions, setShowAllActions] = useState(false);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location } });
+    }
+  }, [isAuthenticated, navigate, location]);
+
+  // Update user data when auth state changes
+  useEffect(() => {
+    if (user) {
+      setUserData(prev => {
+        const updated = {
+          ...prev,
+          name: user.name,
+          email: user.email,
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }, [user]);
+
+  // Save userData to localStorage on change
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(userData));
+  }, [userData]);
 
   // Get the tab from URL query parameter
   useEffect(() => {
@@ -38,18 +79,26 @@ const ProfilePage = () => {
     }
   }, [location.search]);
 
+  useEffect(() => {
+    const stored = localStorage.getItem('ecoRecentActions');
+    if (stored) {
+      setRecentActions(JSON.parse(stored));
+    } else {
+      setRecentActions([]);
+    }
+    // Listen for storage changes in case actions are performed in another tab
+    const onStorage = () => {
+      const updated = localStorage.getItem('ecoRecentActions');
+      setRecentActions(updated ? JSON.parse(updated) : []);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     navigate(`/profile?tab=${value}`);
   };
-
-  const recentActions = [
-    { id: 1, action: "Completed 20-min Outdoor Yoga", date: "Today", points: 10 },
-    { id: 2, action: "Used public transport", date: "Yesterday", points: 5 },
-    { id: 3, action: "Segregated waste", date: "2 days ago", points: 3 },
-    { id: 4, action: "Planted a tree", date: "1 week ago", points: 20 },
-    { id: 5, action: "Completed carbon footprint calculation", date: "1 week ago", points: 2 },
-  ];
 
   const badges = [
     { name: "Tree Master", description: "Planted 10+ trees", icon: "🌳", earned: true },
@@ -68,7 +117,12 @@ const ProfilePage = () => {
 
   const handleSaveProfile = () => {
     setEditing(false);
-    // Save logic would go here in a real app
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been successfully updated",
+    });
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(userData));
+    // In a real app, this would make an API call to update the user's profile
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -78,6 +132,29 @@ const ProfilePage = () => {
       [name]: value
     }));
   };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setUserData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // On logout, clear localStorage profile data
+  const handleLogout = () => {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    logout();
+  };
+
+  // Show loading state while checking authentication
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-eco"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -104,16 +181,26 @@ const ProfilePage = () => {
                   <h2 className="text-xl font-bold">My Profile</h2>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
+              
                 <div className="flex justify-center -mt-16 mb-4">
-                  <Avatar className="h-32 w-32 border-4 border-white">
-                    <AvatarImage src="https://i.pravatar.cc/300?img=5" />
+                <Avatar className="h-32 w-32 border-4 border-white bg-gray-100">
+                  {/* Avatar image based on sex */}
+                  {userData.sex === 'male' ? (
+                    <AvatarImage src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
+                  ) : userData.sex === 'female' ? (
+                    <AvatarImage src="https://cdn-icons-png.flaticon.com/512/3135/3135789.png" />
+                  ) : userData.sex === 'other' ? (
+                    <AvatarImage src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" />
+                  ) : (
+                    <AvatarImage src={`https://i.pravatar.cc/300?u=${userData.email}`} />
+                  )}
                     <AvatarFallback className="bg-eco text-white text-2xl">
                       {userData.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                 </div>
 
+              <CardContent className="space-y-4">
                 <div className="text-center mb-6">
                   {editing ? (
                     <Input 
@@ -150,7 +237,56 @@ const ProfilePage = () => {
                         onChange={handleInputChange}
                       />
                     ) : (
-                      <p className="text-gray-800">{userData.location}</p>
+                      <p className="text-gray-800">{userData.location || 'Not specified'}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label>Place</Label>
+                    {editing ? (
+                      <Input 
+                        name="place"
+                        value={userData.place} 
+                        onChange={handleInputChange}
+                        placeholder="Your city, village, etc."
+                      />
+                    ) : (
+                      <p className="text-gray-800">{userData.place || 'Not specified'}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label>Date of Birth</Label>
+                    {editing ? (
+                      <Input 
+                        name="dob"
+                        type="date"
+                        value={userData.dob}
+                        onChange={handleInputChange}
+                      />
+                    ) : (
+                      <p className="text-gray-800 flex items-center gap-2">{userData.dob ? <><Cake className="h-4 w-4 text-eco" />{userData.dob}</> : 'Not specified'}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label>Sex</Label>
+                    {editing ? (
+                      <select
+                        name="sex"
+                        value={userData.sex}
+                        onChange={handleSelectChange}
+                        className="w-full border rounded-md p-2"
+                      >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    ) : (
+                      <p className="text-gray-800 flex items-center gap-2">
+                        {userData.sex === 'male' && <><User className="h-4 w-4 text-blue-500" /> Male</>}
+                        {userData.sex === 'female' && <><User className="h-4 w-4 text-pink-500" /> Female</>}
+                        {userData.sex === 'other' && <><User className="h-4 w-4 text-green-500" /> Other</>}
+                        {!userData.sex && 'Not specified'}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -174,109 +310,56 @@ const ProfilePage = () => {
 
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={handleTabChange}>
-              <TabsList className="grid grid-cols-3 mb-6">
-                <TabsTrigger value="actions" className="flex items-center">
-                  <Activity className="h-4 w-4 mr-2" />
-                  Actions
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Analytics
-                </TabsTrigger>
-                <TabsTrigger value="achievements" className="flex items-center">
-                  <Award className="h-4 w-4 mr-2" />
-                  Achievements
-                </TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="actions">Recent Actions</TabsTrigger>
+                <TabsTrigger value="achievements">Achievements</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
               
               <TabsContent value="actions">
                 <Card>
                   <CardHeader>
                     <CardTitle>Recent Actions</CardTitle>
-                    <CardDescription>
-                      Your eco-friendly activities from the past month
-                    </CardDescription>
+                    <CardDescription>Your latest eco-friendly activities</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {recentActions.map(action => (
-                        <div key={action.id} className="flex justify-between items-center border-b pb-3">
-                          <div>
-                            <p className="font-medium">{action.action}</p>
-                            <p className="text-sm text-gray-500">{action.date}</p>
-                          </div>
-                          <Badge className="bg-eco">+{action.points} pts</Badge>
+                      {recentActions.length === 0 ? (
+                        <div className="text-center text-gray-400 py-8">
+                          No recent activity yet. Perform a Quick Action to see it here!
                         </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-6 text-center">
-                      <Button className="bg-eco hover:bg-eco-dark text-white">
-                        View All Actions
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="analytics">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Your Impact Analytics</CardTitle>
-                    <CardDescription>
-                      See the difference you're making
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                      <div className="bg-eco-light rounded-lg p-4 text-center">
-                        <h3 className="text-lg font-medium text-gray-700">CO₂ Saved</h3>
-                        <p className="text-3xl font-bold text-eco">124 kg</p>
-                        <p className="text-sm text-gray-500">Last 30 days</p>
-                      </div>
-                      <div className="bg-eco-light rounded-lg p-4 text-center">
-                        <h3 className="text-lg font-medium text-gray-700">Total Actions</h3>
-                        <p className="text-3xl font-bold text-eco">37</p>
-                        <p className="text-sm text-gray-500">This month</p>
-                      </div>
-                      <div className="bg-eco-light rounded-lg p-4 text-center">
-                        <h3 className="text-lg font-medium text-gray-700">Points Earned</h3>
-                        <p className="text-3xl font-bold text-eco">840</p>
-                        <p className="text-sm text-gray-500">Current balance</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="border rounded-md p-4">
-                        <h3 className="font-medium mb-2">Most Frequent Actions</h3>
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span>Public Transport</span>
-                            <span className="font-medium">12 times</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div className="bg-eco h-2.5 rounded-full" style={{ width: '85%' }}></div>
-                          </div>
-                        </div>
-                        <div className="space-y-2 mt-3">
-                          <div className="flex justify-between">
-                            <span>Waste Segregation</span>
-                            <span className="font-medium">8 times</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div className="bg-eco h-2.5 rounded-full" style={{ width: '60%' }}></div>
-                          </div>
-                        </div>
-                        <div className="space-y-2 mt-3">
-                          <div className="flex justify-between">
-                            <span>Yoga Sessions</span>
-                            <span className="font-medium">5 times</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div className="bg-eco h-2.5 rounded-full" style={{ width: '40%' }}></div>
-                          </div>
-                        </div>
-                      </div>
+                      ) : (
+                        <>
+                          {(showAllActions ? recentActions : recentActions.slice(0, 6)).map((action) => (
+                            <div key={action.id} className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+                              <div className="flex items-center">
+                                <Activity className="h-5 w-5 text-eco mr-3" />
+                                <div>
+                                  <p className="font-medium">{action.action}</p>
+                                  <p className="text-sm text-gray-500">{action.date}</p>
+                                </div>
+                              </div>
+                              <Badge variant="secondary" className="bg-eco-light text-eco">
+                                +{action.points} points
+                              </Badge>
+                            </div>
+                          ))}
+                          {recentActions.length > 6 && !showAllActions && (
+                            <div className="flex justify-center mt-4">
+                              <Button variant="outline" onClick={() => setShowAllActions(true)}>
+                                View All
+                              </Button>
+                            </div>
+                          )}
+                          {showAllActions && recentActions.length > 6 && (
+                            <div className="flex justify-center mt-4">
+                              <Button variant="outline" onClick={() => setShowAllActions(false)}>
+                                Show Less
+                              </Button>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -285,27 +368,54 @@ const ProfilePage = () => {
               <TabsContent value="achievements">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Your Achievements</CardTitle>
-                    <CardDescription>
-                      Badges and rewards you've earned
-                    </CardDescription>
+                    <CardTitle>Achievements</CardTitle>
+                    <CardDescription>Your eco-friendly milestones</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {badges.map((badge, index) => (
-                        <div key={index} className={`border rounded-lg p-4 flex items-center gap-4 ${!badge.earned ? 'opacity-60' : ''}`}>
-                          <div className={`${badge.earned ? 'bg-eco-light' : 'bg-gray-100'} w-12 h-12 rounded-full flex items-center justify-center text-2xl`}>
-                            {badge.earned ? badge.icon : '🔒'}
+                        <div
+                          key={index}
+                          className={`p-4 rounded-lg border ${
+                            badge.earned ? 'bg-eco-light border-eco' : 'bg-gray-50 border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">{badge.icon}</span>
+                            <div>
+                              <h4 className="font-medium">{badge.name}</h4>
+                              <p className="text-sm text-gray-600">{badge.description}</p>
                           </div>
-                          <div>
-                            <h3 className="font-medium">{badge.name}</h3>
-                            <p className="text-sm text-gray-500">{badge.description}</p>
-                            {badge.earned && (
-                              <Badge className="mt-1 bg-green-100 text-green-800 hover:bg-green-200">Earned</Badge>
-                            )}
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="analytics">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Analytics</CardTitle>
+                    <CardDescription>Your environmental impact over time</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="p-4 bg-white rounded-lg shadow">
+                          <h4 className="font-medium text-gray-500">Total Points</h4>
+                          <p className="text-2xl font-bold text-eco">1,234</p>
+                          </div>
+                        <div className="p-4 bg-white rounded-lg shadow">
+                          <h4 className="font-medium text-gray-500">Carbon Saved</h4>
+                          <p className="text-2xl font-bold text-eco">2.5 tons</p>
+                          </div>
+                        <div className="p-4 bg-white rounded-lg shadow">
+                          <h4 className="font-medium text-gray-500">Actions Taken</h4>
+                          <p className="text-2xl font-bold text-eco">156</p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

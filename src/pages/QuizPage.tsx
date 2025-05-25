@@ -1,282 +1,157 @@
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Trophy, Award, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CheckCircle, XCircle, Award } from 'lucide-react';
 
-interface QuizQuestion {
+interface Question {
   id: number;
-  question: string;
+  text: string;
   options: string[];
   correctAnswer: number;
   explanation: string;
 }
 
-interface QuizResult {
-  id: string;
-  date: string;
-  score: number;
-  totalQuestions: number;
-  percentageScore: number;
+interface QuizHistoryEntry {
+  id: number;
+  question: string;
+  selected: string;
+  correct: string;
+  isCorrect: boolean;
+  timestamp: string;
 }
 
-const quizQuestions: QuizQuestion[] = [
+const questions: Question[] = [
   {
     id: 1,
-    question: "Which of the following is NOT a renewable energy source?",
+    text: "Which of the following is NOT a renewable energy source?",
     options: ["Solar", "Wind", "Natural Gas", "Hydroelectric"],
     correctAnswer: 2,
     explanation: "Natural gas is a fossil fuel and is not renewable. Solar, wind, and hydroelectric are all renewable energy sources."
   },
   {
     id: 2,
-    question: "What percentage of the Earth's surface is covered by water?",
+    text: "What percentage of the Earth's surface is covered by water?",
     options: ["50%", "60%", "70%", "80%"],
     correctAnswer: 2,
     explanation: "About 71% of the Earth's surface is covered by water, with oceans holding about 96.5% of all Earth's water."
   },
   {
     id: 3,
-    question: "Which of the following actions reduces your carbon footprint the most?",
+    text: "Which of the following actions reduces your carbon footprint the most?",
     options: ["Using paper bags instead of plastic", "Taking shorter showers", "Eating less meat", "Turning off lights when not in use"],
     correctAnswer: 2,
     explanation: "Reducing meat consumption significantly lowers your carbon footprint as livestock farming generates large amounts of greenhouse gases."
   },
   {
     id: 4,
-    question: "What is the primary cause of global warming?",
+    text: "What is the primary cause of global warming?",
     options: ["Solar radiation", "Greenhouse gas emissions", "Natural climate cycles", "Volcanic eruptions"],
     correctAnswer: 1,
     explanation: "Greenhouse gas emissions from human activities like burning fossil fuels are the primary driver of global warming."
   },
   {
     id: 5,
-    question: "Which of these household items should NOT be put in recycling bins?",
+    text: "Which of these household items should NOT be put in recycling bins?",
     options: ["Plastic bottles", "Aluminum cans", "Greasy pizza boxes", "Newspaper"],
     correctAnswer: 2,
     explanation: "Greasy pizza boxes are contaminated with food residue and can't be recycled properly. They should go in compost or trash."
-  },
+  }
 ];
 
+const LOCAL_STORAGE_KEY = 'ecoQuizHistoryV2';
+
 const QuizPage = () => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [hasAnswered, setHasAnswered] = useState(false);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizHistory, setQuizHistory] = useState<QuizResult[]>([]);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [history, setHistory] = useState<QuizHistoryEntry[]>([]);
   const { toast } = useToast();
 
-  // Load quiz history from localStorage on component mount
+  // Load history from localStorage
   useEffect(() => {
-    const savedHistory = localStorage.getItem('ecoQuizHistory');
-    if (savedHistory) {
-      setQuizHistory(JSON.parse(savedHistory));
-    }
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) setHistory(JSON.parse(saved));
   }, []);
 
-  const currentQuestion = quizQuestions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex) / quizQuestions.length) * 100;
+  // Save history to localStorage on change
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(history));
+  }, [history]);
 
   const handleOptionSelect = (optionIndex: number) => {
-    if (hasAnswered) return;
     setSelectedOption(optionIndex);
   };
 
-  const handleSubmitAnswer = () => {
+  const handleNextQuestion = () => {
     if (selectedOption === null) {
       toast({
-        title: "Please select an answer",
-        description: "You need to choose an option before submitting",
+        title: "Select an option",
+        description: "Please select an answer before continuing",
         variant: "destructive",
       });
       return;
     }
 
-    setHasAnswered(true);
-    if (selectedOption === currentQuestion.correctAnswer) {
-      setScore(prevScore => prevScore + 1);
-    }
-  };
-
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < quizQuestions.length - 1) {
-      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-      setSelectedOption(null);
-      setHasAnswered(false);
-    } else {
-      const finalScore = score + (selectedOption === currentQuestion.correctAnswer ? 1 : 0);
-      const percentageScore = (finalScore / quizQuestions.length) * 100;
-      
-      // Save quiz result to history
-      const newResult: QuizResult = {
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        score: finalScore,
-        totalQuestions: quizQuestions.length,
-        percentageScore
-      };
-      
-      const updatedHistory = [...quizHistory, newResult];
-      setQuizHistory(updatedHistory);
-      
-      // Save to localStorage
-      localStorage.setItem('ecoQuizHistory', JSON.stringify(updatedHistory));
-      
-      setQuizCompleted(true);
+    const isCorrect = selectedOption === questions[currentQuestion].correctAnswer;
+    if (isCorrect) {
+      setScore(score + 1);
+      setStreak(streak + 1);
       toast({
-        title: "Quiz Completed!",
-        description: `You scored ${finalScore} out of ${quizQuestions.length}.`,
+        title: "Correct!",
+        description: "Great job! You got it right.",
+        variant: "success",
+      });
+    } else {
+      setStreak(0);
+      toast({
+        title: "Not quite right",
+        description: "Better luck on the next question!",
+        variant: "destructive",
       });
     }
+
+    // Save to history
+    setHistory(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        question: questions[currentQuestion].text,
+        selected: selectedOption !== null ? questions[currentQuestion].options[selectedOption] : '',
+        correct: questions[currentQuestion].options[questions[currentQuestion].correctAnswer],
+        isCorrect,
+        timestamp: new Date().toLocaleString()
+      }
+    ]);
+
+    setShowExplanation(true);
   };
 
-  const handleRestartQuiz = () => {
-    setCurrentQuestionIndex(0);
-    setSelectedOption(null);
-    setHasAnswered(false);
-    setScore(0);
-    setQuizCompleted(false);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const renderQuiz = () => (
-    <Card className="w-full max-w-3xl mx-auto shadow-md hover:shadow-lg transition-shadow">
-      <CardHeader className="bg-eco-gradient text-white rounded-t-lg">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl">Eco Knowledge Quiz</CardTitle>
-          <div className="text-sm font-medium">
-            Question {currentQuestionIndex + 1} of {quizQuestions.length}
-          </div>
-        </div>
-        <Progress value={progress} className="h-2 bg-white/20" />
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">{currentQuestion.question}</h3>
-          <RadioGroup value={selectedOption?.toString()} className="space-y-3">
-            {currentQuestion.options.map((option, index) => (
-              <div 
-                key={index}
-                className={`
-                  flex items-center p-3 rounded-md border cursor-pointer transition-colors
-                  ${hasAnswered && index === currentQuestion.correctAnswer ? 'bg-green-50 border-green-500' : ''}
-                  ${hasAnswered && selectedOption === index && index !== currentQuestion.correctAnswer ? 'bg-red-50 border-red-500' : ''}
-                  ${!hasAnswered ? 'hover:bg-gray-50' : ''}
-                `}
-                onClick={() => handleOptionSelect(index)}
-              >
-                <RadioGroupItem value={index.toString()} id={`option-${index}`} disabled={hasAnswered} />
-                <Label htmlFor={`option-${index}`} className="ml-2 w-full cursor-pointer">
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-
-        {hasAnswered && (
-          <Alert className={selectedOption === currentQuestion.correctAnswer ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}>
-            <AlertTitle className={selectedOption === currentQuestion.correctAnswer ? 'text-green-700' : 'text-red-700'}>
-              {selectedOption === currentQuestion.correctAnswer ? 'Correct!' : 'Incorrect!'}
-            </AlertTitle>
-            <AlertDescription className="text-gray-700">
-              {currentQuestion.explanation}
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div>
-          <span className="text-sm text-gray-500">
-            Score: {score}{hasAnswered && selectedOption === currentQuestion.correctAnswer ? ' + 1' : ''} / {quizQuestions.length}
-          </span>
-        </div>
-        <div>
-          {!hasAnswered ? (
-            <Button className="bg-eco hover:bg-eco-dark text-white" onClick={handleSubmitAnswer}>
-              Submit Answer
-            </Button>
-          ) : (
-            <Button className="bg-eco hover:bg-eco-dark text-white" onClick={handleNextQuestion}>
-              {currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Results'}
-            </Button>
-          )}
-        </div>
-      </CardFooter>
-    </Card>
-  );
-
-  const renderResults = () => {
-    const finalScore = score;
-    const percentage = (finalScore / quizQuestions.length) * 100;
-    
-    let message = '';
-    if (percentage >= 80) {
-      message = 'Excellent! You\'re an eco expert! 🌍';
-    } else if (percentage >= 60) {
-      message = 'Good job! You know your environmental facts! 🌱';
-    } else if (percentage >= 40) {
-      message = 'Not bad! You\'re on your way to becoming eco-savvy. 💧';
+  const handleContinue = () => {
+    setShowExplanation(false);
+      setSelectedOption(null);
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
     } else {
-      message = 'Keep learning! There\'s more to discover about our environment. 🌿';
+      setQuizCompleted(true);
     }
-
-    return (
-      <Card className="w-full max-w-3xl mx-auto text-center shadow-md">
-        <CardHeader className="bg-eco-gradient text-white rounded-t-lg">
-          <CardTitle className="text-2xl">Quiz Results</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-8 pb-6">
-          <div className="mb-6 flex justify-center">
-            <div className="bg-eco-light w-24 h-24 rounded-full flex items-center justify-center">
-              <Trophy className="text-eco w-12 h-12" />
-            </div>
-          </div>
-          
-          <h3 className="text-2xl font-bold mb-2">
-            {finalScore} out of {quizQuestions.length} correct
-          </h3>
-          <p className="text-gray-600 mb-6">{message}</p>
-          
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
-            <div 
-              className="bg-eco h-4 rounded-full" 
-              style={{ width: `${percentage}%` }}
-            ></div>
-          </div>
-          
-          <div className="p-4 bg-eco-light rounded-lg mb-6">
-            <p className="text-gray-700">
-              You've earned <span className="font-bold text-eco">{finalScore * 5} points</span> for your eco knowledge!
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button className="bg-eco hover:bg-eco-dark text-white" onClick={handleRestartQuiz}>
-            Try Again
-          </Button>
-        </CardFooter>
-      </Card>
-    );
   };
+
+  const restartQuiz = () => {
+    setCurrentQuestion(0);
+    setSelectedOption(null);
+    setScore(0);
+    setStreak(0);
+    setQuizCompleted(false);
+    setShowExplanation(false);
+  };
+
+  const progress = ((currentQuestion) / questions.length) * 100;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -290,69 +165,149 @@ const QuizPage = () => {
             Test your environmental knowledge with our quiz! Each correct answer earns you points 
             and helps you learn more about sustainable living.
           </p>
-          
-          {quizCompleted ? renderResults() : renderQuiz()}
-          
-          {/* Quiz history section */}
-          {quizHistory.length > 0 && (
-            <div className="mt-12 max-w-3xl mx-auto">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader className="bg-eco-gradient text-white">
+              <CardTitle>Test Your Environmental Knowledge</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {!quizCompleted ? (
+                <>
+                  <div className="mb-4 flex justify-between text-sm text-gray-500">
+                    <span>Question {currentQuestion + 1} of {questions.length}</span>
+                    <span>Score: {score}/{questions.length} | Streak: {streak} 🔥</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+                    <div className="bg-eco h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                  </div>
+                  <h3 className="text-xl font-medium mb-6 animate-fade-in">{questions[currentQuestion].text}</h3>
+                  <div className="space-y-3">
+                    {questions[currentQuestion].options.map((option, index) => (
+                      <div
+                        key={index}
+                        className={`p-4 border rounded-lg cursor-pointer transition-colors animate-fade-in-fast ${
+                          selectedOption === index
+                            ? "border-eco bg-eco-light"
+                            : "hover:bg-gray-50"
+                        }`}
+                        onClick={() => handleOptionSelect(index)}
+                      >
+                        <div className="flex items-center">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
+                            selectedOption === index
+                              ? "bg-eco text-white"
+                              : "border border-gray-300"
+                          }`}>
+                            {String.fromCharCode(65 + index)}
+                          </div>
+                          <span>{option}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6">
+                    <Button 
+                      onClick={handleNextQuestion}
+                      className="bg-eco hover:bg-eco-dark text-white w-full animate-fade-in-fast"
+                    >
+                      Check Answer
+                    </Button>
+                  </div>
+                  {showExplanation && (
+                    <div className={`mt-6 p-4 rounded-lg animate-fade-in-fast ${
+                      selectedOption === questions[currentQuestion].correctAnswer
+                        ? "bg-green-100 border border-green-300 text-green-700"
+                        : "bg-red-100 border border-red-300 text-red-700"
+                    } flex items-center gap-3`}
+                    >
+                      {selectedOption === questions[currentQuestion].correctAnswer ? (
+                        <CheckCircle className="h-6 w-6 text-green-500" />
+                      ) : (
+                        <XCircle className="h-6 w-6 text-red-500" />
+                      )}
+                      <div>
+                        <div className="font-bold mb-1">
+                          {selectedOption === questions[currentQuestion].correctAnswer ? "Correct!" : "Incorrect!"}
+                        </div>
+                        <div>{questions[currentQuestion].explanation}</div>
+                      </div>
+                      <Button 
+                        onClick={handleContinue}
+                        className="ml-auto bg-eco hover:bg-eco-dark text-white"
+                      >
+                        {currentQuestion < questions.length - 1 ? "Next Question" : "See Results"}
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-6 animate-fade-in">
+                  <h3 className="text-2xl font-bold mb-2">Quiz Completed!</h3>
+                  <p className="text-lg mb-4">
+                    Your score: <span className="font-bold text-eco">{score}/{questions.length}</span>
+                  </p>
+                  <div className="mb-8">
+                    {score === questions.length ? (
+                      <p className="text-green-600">Perfect score! You're an eco-expert! 🌟</p>
+                    ) : score >= questions.length / 2 ? (
+                      <p className="text-eco">Good job! You know your environmental facts! 🌱</p>
+                    ) : (
+                      <p className="text-orange-500">There's room to improve your eco-knowledge. Keep learning! 📚</p>
+                    )}
+                  </div>
+                  <Button 
+                    onClick={restartQuiz}
+                    className="bg-eco hover:bg-eco-dark text-white"
+                  >
+                    Restart Quiz
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          {/* Quiz History Section */}
+          <div className="max-w-2xl mx-auto mt-10">
               <h3 className="text-xl font-bold mb-4 flex items-center">
                 <Award className="w-5 h-5 mr-2 text-eco" />
                 Your Quiz History
               </h3>
-              
               <Card>
                 <CardContent className="p-4">
+                {history.length === 0 ? (
+                  <p className="text-gray-500">No quiz history yet. Start playing to see your progress!</p>
+                ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-eco bg-opacity-10 text-left">
-                          <th className="py-2 px-3 border-b">Date</th>
-                          <th className="py-2 px-3 border-b">Score</th>
-                          <th className="py-2 px-3 border-b">Performance</th>
+                          <th className="py-2 px-3 border-b">Time</th>
+                          <th className="py-2 px-3 border-b">Question</th>
+                          <th className="py-2 px-3 border-b">Your Answer</th>
+                          <th className="py-2 px-3 border-b">Correct Answer</th>
+                          <th className="py-2 px-3 border-b">Result</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {quizHistory.slice().reverse().map((result) => (
-                          <tr key={result.id} className="hover:bg-gray-50">
-                            <td className="py-2 px-3 border-b">{formatDate(result.date)}</td>
-                            <td className="py-2 px-3 border-b font-medium">
-                              {result.score}/{result.totalQuestions}
-                              <span className="ml-2 text-sm text-gray-500">
-                                ({result.percentageScore.toFixed(0)}%)
-                              </span>
-                            </td>
+                        {history.slice().reverse().map((entry) => (
+                          <tr key={entry.id} className="hover:bg-gray-50">
+                            <td className="py-2 px-3 border-b whitespace-nowrap">{entry.timestamp}</td>
+                            <td className="py-2 px-3 border-b">{entry.question}</td>
+                            <td className="py-2 px-3 border-b">{entry.selected}</td>
+                            <td className="py-2 px-3 border-b">{entry.correct}</td>
                             <td className="py-2 px-3 border-b">
-                              <div className="flex items-center gap-1">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                  <Star 
-                                    key={i}
-                                    className={`h-4 w-4 ${
-                                      i < Math.round(result.percentageScore / 20) 
-                                        ? 'fill-amber-400 text-amber-400' 
-                                        : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
+                              {entry.isCorrect ? (
+                                <span className="text-green-600 font-bold flex items-center gap-1"><CheckCircle className="h-4 w-4" /> Correct</span>
+                              ) : (
+                                <span className="text-red-600 font-bold flex items-center gap-1"><XCircle className="h-4 w-4" /> Incorrect</span>
+                              )}
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                )}
                 </CardContent>
               </Card>
-            </div>
-          )}
-          
-          <div className="mt-12 max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-semibold mb-4">Why Environmental Knowledge Matters</h3>
-            <p className="text-gray-600">
-              Understanding environmental issues helps us make better choices in our daily lives. 
-              By learning about sustainability, climate change, and conservation, we can take informed actions 
-              that reduce our impact on the planet and create a greener future for everyone.
-            </p>
           </div>
         </div>
       </main>

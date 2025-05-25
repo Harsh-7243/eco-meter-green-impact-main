@@ -1,8 +1,8 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { CheckCircle, XCircle, Award, Star } from 'lucide-react';
 
 interface Question {
   id: number;
@@ -10,6 +10,15 @@ interface Question {
   options: string[];
   correctAnswer: number;
   explanation: string;
+}
+
+interface QuizHistoryEntry {
+  id: number;
+  question: string;
+  selected: string;
+  correct: string;
+  isCorrect: boolean;
+  timestamp: string;
 }
 
 const questions: Question[] = [
@@ -51,13 +60,28 @@ const questions: Question[] = [
   }
 ];
 
+const LOCAL_STORAGE_KEY = 'ecoQuizHistoryV2';
+
 const EcoQA = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [history, setHistory] = useState<QuizHistoryEntry[]>([]);
   const { toast } = useToast();
+
+  // Load history from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) setHistory(JSON.parse(saved));
+  }, []);
+
+  // Save history to localStorage on change
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(history));
+  }, [history]);
 
   const handleOptionSelect = (optionIndex: number) => {
     setSelectedOption(optionIndex);
@@ -73,13 +97,17 @@ const EcoQA = () => {
       return;
     }
 
-    if (selectedOption === questions[currentQuestion].correctAnswer) {
+    const isCorrect = selectedOption === questions[currentQuestion].correctAnswer;
+    if (isCorrect) {
       setScore(score + 1);
+      setStreak(streak + 1);
       toast({
         title: "Correct!",
         description: "Great job! You got it right.",
+        variant: "success",
       });
     } else {
+      setStreak(0);
       toast({
         title: "Not quite right",
         description: "Better luck on the next question!",
@@ -87,13 +115,25 @@ const EcoQA = () => {
       });
     }
 
+    // Save to history
+    setHistory(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        question: questions[currentQuestion].text,
+        selected: selectedOption !== null ? questions[currentQuestion].options[selectedOption] : '',
+        correct: questions[currentQuestion].options[questions[currentQuestion].correctAnswer],
+        isCorrect,
+        timestamp: new Date().toLocaleString()
+      }
+    ]);
+
     setShowExplanation(true);
   };
 
   const handleContinue = () => {
     setShowExplanation(false);
     setSelectedOption(null);
-    
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -105,9 +145,12 @@ const EcoQA = () => {
     setCurrentQuestion(0);
     setSelectedOption(null);
     setScore(0);
+    setStreak(0);
     setQuizCompleted(false);
     setShowExplanation(false);
   };
+
+  const progress = ((currentQuestion) / questions.length) * 100;
 
   return (
     <div className="py-12 bg-gray-50">
@@ -115,7 +158,6 @@ const EcoQA = () => {
         <h2 className="text-3xl font-bold text-center text-eco-dark mb-8">
           Eco Knowledge Quiz
         </h2>
-
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="bg-eco-gradient text-white">
             <CardTitle>Test Your Environmental Knowledge</CardTitle>
@@ -125,18 +167,17 @@ const EcoQA = () => {
               <>
                 <div className="mb-4 flex justify-between text-sm text-gray-500">
                   <span>Question {currentQuestion + 1} of {questions.length}</span>
-                  <span>Score: {score}/{questions.length}</span>
+                  <span>Score: {score}/{questions.length} | Streak: {streak} 🔥</span>
                 </div>
-                
-                <h3 className="text-xl font-medium mb-6">{questions[currentQuestion].text}</h3>
-                
-                {!showExplanation ? (
-                  <>
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+                  <div className="bg-eco h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+                </div>
+                <h3 className="text-xl font-medium mb-6 animate-fade-in">{questions[currentQuestion].text}</h3>
                     <div className="space-y-3">
                       {questions[currentQuestion].options.map((option, index) => (
                         <div
                           key={index}
-                          className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors animate-fade-in-fast ${
                             selectedOption === index
                               ? "border-eco bg-eco-light"
                               : "hover:bg-gray-50"
@@ -156,34 +197,35 @@ const EcoQA = () => {
                         </div>
                       ))}
                     </div>
-                    
                     <div className="mt-6">
                       <Button 
                         onClick={handleNextQuestion}
-                        className="bg-eco hover:bg-eco-dark text-white w-full"
+                    className="bg-eco hover:bg-eco-dark text-white w-full animate-fade-in-fast"
                       >
                         Check Answer
                       </Button>
                     </div>
-                  </>
-                ) : (
-                  <div className="mt-4">
-                    <div className={`p-4 rounded-lg ${
-                      selectedOption === questions[currentQuestion].correctAnswer
-                        ? "bg-green-100 border border-green-300"
-                        : "bg-red-100 border border-red-300"
-                    }`}>
-                      <p className="font-medium mb-2">
-                        {selectedOption === questions[currentQuestion].correctAnswer
-                          ? "Correct!"
-                          : "Incorrect!"}
-                      </p>
-                      <p>{questions[currentQuestion].explanation}</p>
+                {showExplanation && (
+                  <div className={`mt-6 p-4 rounded-lg animate-fade-in-fast ${
+                    selectedOption === questions[currentQuestion].correctAnswer
+                      ? "bg-green-100 border border-green-300 text-green-700"
+                      : "bg-red-100 border border-red-300 text-red-700"
+                  } flex items-center gap-3`}
+                  >
+                    {selectedOption === questions[currentQuestion].correctAnswer ? (
+                      <CheckCircle className="h-6 w-6 text-green-500" />
+                    ) : (
+                      <XCircle className="h-6 w-6 text-red-500" />
+                    )}
+                    <div>
+                      <div className="font-bold mb-1">
+                        {selectedOption === questions[currentQuestion].correctAnswer ? "Correct!" : "Incorrect!"}
+                      </div>
+                      <div>{questions[currentQuestion].explanation}</div>
                     </div>
-                    
                     <Button 
                       onClick={handleContinue}
-                      className="mt-4 bg-eco hover:bg-eco-dark text-white w-full"
+                      className="ml-auto bg-eco hover:bg-eco-dark text-white"
                     >
                       {currentQuestion < questions.length - 1 ? "Next Question" : "See Results"}
                     </Button>
@@ -191,12 +233,11 @@ const EcoQA = () => {
                 )}
               </>
             ) : (
-              <div className="text-center py-6">
+              <div className="text-center py-6 animate-fade-in">
                 <h3 className="text-2xl font-bold mb-2">Quiz Completed!</h3>
                 <p className="text-lg mb-4">
                   Your score: <span className="font-bold text-eco">{score}/{questions.length}</span>
                 </p>
-                
                 <div className="mb-8">
                   {score === questions.length ? (
                     <p className="text-green-600">Perfect score! You're an eco-expert! 🌟</p>
@@ -206,7 +247,6 @@ const EcoQA = () => {
                     <p className="text-orange-500">There's room to improve your eco-knowledge. Keep learning! 📚</p>
                   )}
                 </div>
-                
                 <Button 
                   onClick={restartQuiz}
                   className="bg-eco hover:bg-eco-dark text-white"
@@ -217,6 +257,51 @@ const EcoQA = () => {
             )}
           </CardContent>
         </Card>
+        {/* Quiz History Section */}
+        <div className="max-w-2xl mx-auto mt-10">
+          <h3 className="text-xl font-bold mb-4 flex items-center">
+            <Award className="w-5 h-5 mr-2 text-eco" />
+            Your Quiz History
+          </h3>
+          <Card>
+            <CardContent className="p-4">
+              {history.length === 0 ? (
+                <p className="text-gray-500">No quiz history yet. Start playing to see your progress!</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-eco bg-opacity-10 text-left">
+                        <th className="py-2 px-3 border-b">Time</th>
+                        <th className="py-2 px-3 border-b">Question</th>
+                        <th className="py-2 px-3 border-b">Your Answer</th>
+                        <th className="py-2 px-3 border-b">Correct Answer</th>
+                        <th className="py-2 px-3 border-b">Result</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.slice().reverse().map((entry) => (
+                        <tr key={entry.id} className="hover:bg-gray-50">
+                          <td className="py-2 px-3 border-b whitespace-nowrap">{entry.timestamp}</td>
+                          <td className="py-2 px-3 border-b">{entry.question}</td>
+                          <td className="py-2 px-3 border-b">{entry.selected}</td>
+                          <td className="py-2 px-3 border-b">{entry.correct}</td>
+                          <td className="py-2 px-3 border-b">
+                            {entry.isCorrect ? (
+                              <span className="text-green-600 font-bold flex items-center gap-1"><CheckCircle className="h-4 w-4" /> Correct</span>
+                            ) : (
+                              <span className="text-red-600 font-bold flex items-center gap-1"><XCircle className="h-4 w-4" /> Incorrect</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

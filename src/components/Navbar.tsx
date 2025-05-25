@@ -1,15 +1,16 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Home, Calculator, Award, MessageSquare, Users, Gift, User, LogOut, X, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
   const location = useLocation();
+  const { isAuthenticated, logout } = useAuth();
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -23,16 +24,24 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account",
+    });
+  };
+
   return (
     <div className="relative z-50">
-      <div className="bg-white shadow-sm border-b px-4 py-3">
-        <div className="container mx-auto flex items-center justify-between">
+      <div className="bg-white shadow-sm">
+        <div className="container mx-auto flex items-center justify-between py-4">
           <div className="flex items-center space-x-2">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleMenuToggle}
-              className="lg:hidden"
+              className="hover:bg-eco-light"
             >
               <Menu className="h-6 w-6 text-eco-dark" />
             </Button>
@@ -44,64 +53,29 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
-            <NavItem 
-              icon={<Home className="h-4 w-4 mr-1" />} 
-              label="Home" 
-              to="/"
-              isActive={location.pathname === "/"}
-            />
-            <NavItem 
-              icon={<Calculator className="h-4 w-4 mr-1" />} 
-              label="Calculator" 
-              to="/calculator"
-              isActive={location.pathname === "/calculator"}
-            />
-            <NavItem 
-              icon={<Award className="h-4 w-4 mr-1" />} 
-              label="Achievements" 
-              to="/profile?tab=achievements"
-              isActive={location.pathname === "/profile" && location.search.includes("achievements")}
-            />
-            <NavItem 
-              icon={<MessageSquare className="h-4 w-4 mr-1" />} 
-              label="Eco Tips" 
-              to="/ecotips"
-              isActive={location.pathname === "/ecotips"}
-            />
-            <NavItem 
-              icon={<Users className="h-4 w-4 mr-1" />} 
-              label="Leaderboard" 
-              to="/leaderboard"
-              isActive={location.pathname === "/leaderboard"}
-            />
-            <NavItem 
-              icon={<Trophy className="h-4 w-4 mr-1" />} 
-              label="Quiz" 
-              to="/quiz"
-              isActive={location.pathname === "/quiz"}
-            />
-            <NavItem 
-              icon={<Gift className="h-4 w-4 mr-1" />} 
-              label="Rewards" 
-              to="/rewards"
-              isActive={location.pathname === "/rewards"}
-            />
+          {/* Desktop Navigation - Only Login/Logout */}
+          <div className="flex items-center space-x-2">
+            {isAuthenticated ? (
+              <Button 
+                variant="ghost" 
+                onClick={handleLogout}
+                className="flex items-center hover:bg-eco-light"
+              >
+                <LogOut className="h-5 w-5 text-eco-dark mr-1" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            ) : (
+              <Link to="/login">
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center hover:bg-eco-light"
+                >
+                  <User className="h-5 w-5 text-eco-dark mr-1" />
+                  <span className="hidden sm:inline">Login</span>
+                </Button>
+              </Link>
+            )}
           </div>
-
-          <Link to="/profile">
-            <Button 
-              variant="ghost" 
-              className={cn(
-                "flex items-center",
-                location.pathname === "/profile" && "bg-gray-100"
-              )}
-            >
-              <User className="h-5 w-5 text-eco-dark mr-1" />
-              <span className="hidden sm:inline">Profile</span>
-            </Button>
-          </Link>
         </div>
       </div>
 
@@ -132,7 +106,7 @@ const Navbar = () => {
           </Button>
         </div>
 
-        <div className="py-2">
+        <div className="py-4">
           <SidebarItem 
             icon={<Home className="h-5 w-5" />} 
             label="Home" 
@@ -140,16 +114,10 @@ const Navbar = () => {
             isActive={location.pathname === "/"}
           />
           <SidebarItem 
-            icon={<Menu className="h-5 w-5" />} 
-            label="Quick Actions" 
-            to="/" 
-            isActive={false}
-          />
-          <SidebarItem 
-            icon={<Calculator className="h-5 w-5" />} 
-            label="Calculator" 
-            to="/calculator" 
-            isActive={location.pathname === "/calculator"}
+            icon={<MessageSquare className="h-5 w-5" />} 
+            label="Quick Action" 
+            to="/quick-actions" 
+            isActive={location.pathname === "/quick-actions"}
           />
           <SidebarItem 
             icon={<MessageSquare className="h-5 w-5" />} 
@@ -181,64 +149,17 @@ const Navbar = () => {
             to="/rewards" 
             isActive={location.pathname === "/rewards"}
           />
-          <SidebarItem 
-            icon={<User className="h-5 w-5" />} 
-            label="Profile" 
-            to="/profile" 
-            isActive={location.pathname === "/profile" && !location.search.includes("achievements")}
-          />
-          
-          <div className="border-t mt-4 pt-4">
+          {isAuthenticated && (
             <SidebarItem 
-              icon={<LogOut className="h-5 w-5" />} 
-              label="Logout" 
-              onClick={() => handleMenuItemClick("Logout")} 
-              isActive={false}
+              icon={<User className="h-5 w-5" />} 
+              label="Profile" 
+              to="/profile" 
+              isActive={location.pathname === "/profile" && !location.search.includes("achievements")}
             />
-          </div>
+          )}
         </div>
       </div>
     </div>
-  );
-};
-
-type NavItemProps = {
-  icon: React.ReactNode;
-  label: string;
-  to?: string;
-  onClick?: () => void;
-  isActive?: boolean;
-};
-
-const NavItem = ({ icon, label, to, onClick, isActive = false }: NavItemProps) => {
-  if (to) {
-    return (
-      <Link to={to}>
-        <Button 
-          variant="ghost" 
-          className={cn(
-            "flex items-center", 
-            isActive 
-              ? "text-foreground bg-gray-100" 
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {icon}
-          <span>{label}</span>
-        </Button>
-      </Link>
-    );
-  }
-  
-  return (
-    <Button 
-      variant="ghost" 
-      onClick={onClick} 
-      className="flex items-center text-muted-foreground hover:text-foreground"
-    >
-      {icon}
-      <span>{label}</span>
-    </Button>
   );
 };
 

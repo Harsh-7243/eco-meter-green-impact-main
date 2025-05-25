@@ -1,15 +1,14 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 const leaderboardData = [
-  { rank: 1, name: "Emma Watson", score: 840, eco_actions: 42, image: "/src/assets/avatar1.png", badges: ["Tree Master", "Recycling Pro"] },
-  { rank: 2, name: "Thomas Green", score: 790, eco_actions: 38, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
-  { rank: 3, name: "Sophia Chen", score: 760, eco_actions: 35, image: "/src/assets/avatar3.png", badges: ["Energy Star"] },
-  { rank: 4, name: "Miguel Lopez", score: 710, eco_actions: 32, image: "/src/assets/avatar4.png", badges: ["Bike Hero"] },
-  { rank: 5, name: "Jessica Taylor", score: 680, eco_actions: 30, image: "/src/assets/avatar5.png", badges: [] },
+  { rank: 1, name: "Aarav Sharma", score: 840, eco_actions: 42, image: "/src/assets/avatar1.png", badges: ["Tree Master", "Recycling Pro"] },
+  { rank: 2, name: "Priya Singh", score: 790, eco_actions: 38, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
+  { rank: 3, name: "Rohan Patel", score: 760, eco_actions: 35, image: "/src/assets/avatar3.png", badges: ["Energy Star"] },
+  { rank: 4, name: "Sneha Iyer", score: 710, eco_actions: 32, image: "/src/assets/avatar4.png", badges: ["Bike Hero"] },
+  { rank: 5, name: "Vikram Desai", score: 680, eco_actions: 30, image: "/src/assets/avatar5.png", badges: [] },
 ];
 
 const Leaderboard = () => {

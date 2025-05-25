@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,7 +34,20 @@ const Calculator = () => {
         emissionFactor = 0.12;
     }
 
-    setResult(parseFloat((distanceValue * emissionFactor).toFixed(2)));
+    const calculatedResult = parseFloat((distanceValue * emissionFactor).toFixed(2));
+    setResult(calculatedResult);
+
+    // Add to recent actions
+    const now = new Date();
+    const dateStr = now.toLocaleDateString() === new Date().toLocaleDateString() ? 'Today' : now.toLocaleDateString();
+    const newRecentAction = {
+      id: Date.now(),
+      action: `Calculated ${calculatedResult} kg CO₂ emissions for ${transportationType} travel`,
+      date: dateStr,
+      points: 2,
+    };
+    const prev = JSON.parse(localStorage.getItem('ecoRecentActions') || '[]');
+    localStorage.setItem('ecoRecentActions', JSON.stringify([newRecentAction, ...prev].slice(0, 20)));
   };
 
   return (

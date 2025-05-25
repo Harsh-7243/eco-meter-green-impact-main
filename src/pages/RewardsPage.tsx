@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface Reward {
   id: string;
@@ -33,7 +33,7 @@ const rewards: Reward[] = [
     id: 'amazon-10',
     title: '$10 Amazon Gift Card',
     description: 'Redeem your eco points for a $10 Amazon Gift Card to use on your next purchase.',
-    image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGdpZnQlMjBjYXJkfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/amazon_gift_card.avif',
     pointsRequired: 1000,
     category: 'shopping',
     isNew: true
@@ -42,7 +42,7 @@ const rewards: Reward[] = [
     id: 'zoo-tickets',
     title: 'Two Zoo Tickets',
     description: 'Get free admission for two to your local zoo and learn about wildlife conservation efforts.',
-    image: 'https://images.unsplash.com/photo-1503919005314-34926bf2471b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHpvb3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/zoo_ticket.avif',
     pointsRequired: 750,
     category: 'experience'
   },
@@ -50,7 +50,7 @@ const rewards: Reward[] = [
     id: 'plant-tree',
     title: 'Plant a Tree in Your Name',
     description: 'We\'ll plant a tree in a deforested area and send you a certificate with GPS coordinates.',
-    image: 'https://images.unsplash.com/photo-1513264648640-5a1bd0a1db1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHRyZWUlMjBwbGFudGluZ3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/plant_a_tree.webp',
     pointsRequired: 500,
     category: 'environment'
   },
@@ -58,7 +58,7 @@ const rewards: Reward[] = [
     id: 'sustainable-cup',
     title: 'Reusable Coffee Cup',
     description: 'A high-quality insulated coffee cup made from recycled materials - perfect for your daily coffee routine.',
-    image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGNvZmZlZSUyMGN1cHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/Reusable_Coffee_Cup.webp',
     pointsRequired: 350,
     category: 'lifestyle'
   },
@@ -66,7 +66,7 @@ const rewards: Reward[] = [
     id: 'garden-kit',
     title: 'Home Garden Starter Kit',
     description: 'Begin your gardening journey with this complete starter kit including seeds, pots, and soil.',
-    image: 'https://images.unsplash.com/photo-1647354370532-0343df577fbc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGdhcmRlbiUyMGtpdHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/Home_Garden_Starter_Kit.webp',
     pointsRequired: 450,
     category: 'lifestyle'
   },
@@ -74,7 +74,7 @@ const rewards: Reward[] = [
     id: 'eco-workshop',
     title: 'Sustainability Workshop',
     description: 'Attend an exclusive online workshop with environmental experts on sustainable living practices.',
-    image: 'https://images.unsplash.com/photo-1531497865144-0464ef8fb9a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHdvcmtzaG9wfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/Sustainability_Workshop.jpg',
     pointsRequired: 200,
     category: 'education',
     isExclusive: true
@@ -83,7 +83,7 @@ const rewards: Reward[] = [
     id: 'donation-wwf',
     title: '25$ Donation to WWF',
     description: 'We\'ll make a $25 donation in your name to the World Wildlife Fund to support conservation efforts.',
-    image: 'https://images.unsplash.com/photo-1566576088842-6816db6430d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d3dmfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/donation_to_wwf.jpg',
     pointsRequired: 600,
     category: 'charity'
   },
@@ -91,7 +91,7 @@ const rewards: Reward[] = [
     id: 'premium-month',
     title: '1 Month Premium Membership',
     description: 'Upgrade to premium membership with advanced tracking features and exclusive content.',
-    image: 'https://images.unsplash.com/photo-1586892477838-2b96e85e0f96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHByZW1pdW18ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
+    image: '/rewards/premium_membership.webp',
     pointsRequired: 800,
     category: 'membership',
     availableUntil: '2025-06-30'
@@ -103,6 +103,7 @@ const RewardsPage = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [hoveredReward, setHoveredReward] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const categories = Array.from(new Set(rewards.map(reward => reward.category)));
 
@@ -126,22 +127,16 @@ const RewardsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-eco-light flex flex-col">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-eco-dark mb-2">
-            <span className="inline-block relative">
-              Eco Rewards
-              <span className="absolute -top-4 -right-8">
-                <Sparkles className="h-6 w-6 text-amber-400" />
-              </span>
-            </span>
-          </h2>
-          <p className="text-center text-gray-600 max-w-2xl mx-auto mb-10 italic">
-            Turn your eco-friendly actions into amazing rewards
-          </p>
-          
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 py-8">
+          <button onClick={() => navigate('/')} className="mb-4 text-eco hover:underline flex items-center">
+            <span className="mr-2">←</span> Back
+          </button>
+          <h1 className="text-3xl font-bold text-center text-eco-dark mb-8">
+            Rewards
+          </h1>
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

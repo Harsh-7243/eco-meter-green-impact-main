@@ -1,8 +1,8 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const [showMissionModal, setShowMissionModal] = useState(false);
   return (
     <footer className="bg-eco-dark text-white py-12">
       <div className="container mx-auto px-4">
@@ -18,19 +18,19 @@ const Footer = () => {
               Track your green impact, one step at a time. Join us in creating a more sustainable future.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=srivastavaharsh0806@gmail.com" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors" title="Gmail">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 20v-9.99l7.99 7.99c.39.39 1.02.39 1.41 0L20 10.01V20H4z" />
                 </svg>
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a href="https://x.com/harsh_7243" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors" title="X">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                  <path d="M17.53 2.47a.75.75 0 0 1 1.06 1.06L13.06 9l5.53 5.47a.75.75 0 1 1-1.06 1.06L12 10.06l-5.53 5.47a.75.75 0 1 1-1.06-1.06L10.94 9 5.41 3.53a.75.75 0 1 1 1.06-1.06L12 7.94l5.53-5.47z" />
                 </svg>
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a href="https://www.instagram.com/harsh_7243/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors" title="Instagram">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
+                  <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5A4.25 4.25 0 0 0 20.5 16.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5zm5.25.75a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
                 </svg>
               </a>
             </div>
@@ -50,8 +50,16 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">About</h3>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-300 hover:text-white transition-colors">Our Mission</Link></li>
-              <li><Link to="/team" className="text-gray-300 hover:text-white transition-colors">Team</Link></li>
+              <li>
+                <button
+                  onClick={() => setShowMissionModal(true)}
+                  className="text-gray-300 hover:text-white transition-colors underline focus:outline-none"
+                  type="button"
+                >
+                  Our Mission
+                </button>
+              </li>
+              <li><Link to="/#team-section" className="text-gray-300 hover:text-white transition-colors">Team</Link></li>
               <li><Link to="/partners" className="text-gray-300 hover:text-white transition-colors">Partners</Link></li>
               <li><Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link></li>
             </ul>
@@ -62,15 +70,22 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-start">
                 <span className="mr-2">📧</span>
-                <span className="text-gray-300">info@ecometer.app</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">📱</span>
-                <span className="text-gray-300">+1 (555) 123-4567</span>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=srivastavaharsh0806@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white underline transition-colors"
+                >
+                  srivastavaharsh0806@gmail.com
+                </a>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">🏢</span>
-                <span className="text-gray-300">123 Green Street, Eco City, Earth</span>
+                <span className="text-gray-300">PES College of Engineering, Mandya, Karnataka</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2">👤</span>
+                <span className="text-gray-300">Harsh Kumar</span>
               </li>
             </ul>
           </div>
@@ -87,6 +102,27 @@ const Footer = () => {
           </div>
         </div>
       </div>
+      {/* Mission Modal */}
+      {showMissionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-lg shadow-lg p-4 max-w-lg w-full relative">
+            <button
+              className="absolute top-2 right-2 text-gray-600 hover:text-eco-dark text-2xl font-bold focus:outline-none"
+              onClick={() => setShowMissionModal(false)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <img
+              src="/images/Our_mission.jpg"
+              alt="Our Mission"
+              className="w-full h-auto rounded-lg object-cover mb-2"
+              style={{ maxHeight: '60vh' }}
+            />
+            <div className="text-center text-eco-dark font-semibold text-lg mt-2">Our Mission</div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 };

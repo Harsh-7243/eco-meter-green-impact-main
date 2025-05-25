@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -6,29 +5,30 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useNavigate } from 'react-router-dom';
 
 const globalLeaderboardData = [
-  { rank: 1, name: "Emma Watson", score: 840, eco_actions: 42, image: "/src/assets/avatar1.png", badges: ["Tree Master", "Recycling Pro"] },
-  { rank: 2, name: "Thomas Green", score: 790, eco_actions: 38, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
-  { rank: 3, name: "Sophia Chen", score: 760, eco_actions: 35, image: "/src/assets/avatar3.png", badges: ["Energy Star"] },
-  { rank: 4, name: "Miguel Lopez", score: 710, eco_actions: 32, image: "/src/assets/avatar4.png", badges: ["Bike Hero"] },
-  { rank: 5, name: "Jessica Taylor", score: 680, eco_actions: 30, image: "/src/assets/avatar5.png", badges: [] },
+  { rank: 1, name: "Aarav Sharma", score: 840, eco_actions: 42, image: "/src/assets/avatar1.png", badges: ["Tree Master", "Recycling Pro"] },
+  { rank: 2, name: "Priya Singh", score: 790, eco_actions: 38, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
+  { rank: 3, name: "Rohan Patel", score: 760, eco_actions: 35, image: "/src/assets/avatar3.png", badges: ["Energy Star"] },
+  { rank: 4, name: "Sneha Iyer", score: 710, eco_actions: 32, image: "/src/assets/avatar4.png", badges: ["Bike Hero"] },
+  { rank: 5, name: "Vikram Desai", score: 680, eco_actions: 30, image: "/src/assets/avatar5.png", badges: [] },
 ];
 
 const localLeaderboardData = [
-  { rank: 1, name: "Carlos Rodriguez", score: 720, eco_actions: 35, image: "/src/assets/avatar3.png", badges: ["Bike Hero", "Energy Star"] },
-  { rank: 2, name: "Emma Watson", score: 695, eco_actions: 32, image: "/src/assets/avatar1.png", badges: ["Tree Master"] },
-  { rank: 3, name: "Lin Wei", score: 660, eco_actions: 30, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
-  { rank: 4, name: "Zoe Mitchell", score: 610, eco_actions: 28, image: "/src/assets/avatar5.png", badges: [] },
-  { rank: 5, name: "David Thompson", score: 580, eco_actions: 25, image: "/src/assets/avatar4.png", badges: ["Energy Star"] },
+  { rank: 1, name: "Ananya Joshi", score: 720, eco_actions: 35, image: "/src/assets/avatar3.png", badges: ["Bike Hero", "Energy Star"] },
+  { rank: 2, name: "Rahul Verma", score: 695, eco_actions: 32, image: "/src/assets/avatar1.png", badges: ["Tree Master"] },
+  { rank: 3, name: "Meera Nair", score: 660, eco_actions: 30, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
+  { rank: 4, name: "Karan Mehta", score: 610, eco_actions: 28, image: "/src/assets/avatar5.png", badges: [] },
+  { rank: 5, name: "Divya Rao", score: 580, eco_actions: 25, image: "/src/assets/avatar4.png", badges: ["Energy Star"] },
 ];
 
 const friendsLeaderboardData = [
-  { rank: 1, name: "Sarah Johnson", score: 710, eco_actions: 34, image: "/src/assets/avatar5.png", badges: ["Recycling Pro", "Energy Star"] },
-  { rank: 2, name: "Emma Watson", score: 695, eco_actions: 32, image: "/src/assets/avatar1.png", badges: ["Tree Master"] },
-  { rank: 3, name: "John Smith", score: 630, eco_actions: 29, image: "/src/assets/avatar4.png", badges: ["Bike Hero"] },
-  { rank: 4, name: "Aisha Patel", score: 590, eco_actions: 27, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
-  { rank: 5, name: "Michael Brown", score: 540, eco_actions: 24, image: "/src/assets/avatar3.png", badges: [] },
+  { rank: 1, name: "Siddharth Gupta", score: 710, eco_actions: 34, image: "/src/assets/avatar5.png", badges: ["Recycling Pro", "Energy Star"] },
+  { rank: 2, name: "Ishita Kapoor", score: 695, eco_actions: 32, image: "/src/assets/avatar1.png", badges: ["Tree Master"] },
+  { rank: 3, name: "Aditya Pillai", score: 630, eco_actions: 29, image: "/src/assets/avatar4.png", badges: ["Bike Hero"] },
+  { rank: 4, name: "Neha Reddy", score: 590, eco_actions: 27, image: "/src/assets/avatar2.png", badges: ["Water Saver"] },
+  { rank: 5, name: "Manish Jain", score: 540, eco_actions: 24, image: "/src/assets/avatar3.png", badges: [] },
 ];
 
 interface LeaderboardUser {
@@ -102,11 +102,15 @@ const LeaderboardTable = ({ data }: { data: LeaderboardUser[] }) => {
 };
 
 const LeaderboardPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       <main className="flex-grow py-12">
         <div className="container mx-auto px-4">
+          <button onClick={() => navigate('/')} className="mb-4 text-eco hover:underline flex items-center">
+            <span className="mr-2">←</span> Back
+          </button>
           <h2 className="text-3xl font-bold text-center text-eco-dark mb-8">
             Eco Leaderboards
           </h2>
